@@ -91,6 +91,7 @@ libhdf5-dev
 libnetcdf-dev
 libxml2-dev
 libxslt1-dev
+macaulay2
 octave
 """.split()
 
@@ -557,6 +558,12 @@ class SCLXC(object):
                 raise RuntimeError("failed to create " + self.name)
         os.environ.unsetenv("HTTP_PROXY")
 
+        self.inside("echo \
+            'deb https://faculty.math.illinois.edu/Macaulay2/Repositories/Ubuntu bionic main' \
+            >/etc/apt/sources.list.d/macaulay2.list")
+        self.inside("apt-key adv --keyserver hkp://keys.gnupg.net \
+                    --recv-key CD9C0E09B0C780943A1AD85553F8BD99F40DCB31")
+        self.update()
         log.info("installing packages")
         self.inside("apt install -y " + " ".join(packages))
         self.inside("/usr/sbin/deluser ubuntu --remove-home")
@@ -568,7 +575,6 @@ class SCLXC(object):
         self.inside("apt install -y tmpreaper")
         log.info("installing npm packages")
         self.inside("npm install -g requirejs")
-        self.update()
 
     def destroy(self):
         r"""
@@ -678,7 +684,6 @@ class SCLXC(object):
         # Let first-time tasks to run and complete.
         self.start()
         timer_delay(start_delay)
-        self.shutdown()
         
     def ip(self):
         self.start()
